@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Routing;
 
 namespace OdeToFood
 {
@@ -66,7 +67,8 @@ namespace OdeToFood
 
             // Combines both UseDefaultFiles(); and UseStaticFiles(); 
             app.UseFileServer();
-
+            
+            ////////////////////////////////////////////////////////////////////////////////////////////////////////////
             // **** Middleware example, most middleware are configurable by adding the options object. **** //
             //app.UseWelcomePage(new WelcomePageOptions
             //{
@@ -79,10 +81,28 @@ namespace OdeToFood
             //var message = greeter.GetGreeting();
             //await context.Response.WriteAsync(message);
             // });
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-            /* **** Goal of this middleware is going to look at an incoming HTTP request and try to map that request to a method on a C# class. The MVC framwork then invokes a method,
-                    and that method will tell the MVC framework what to do next. **** */
-            app.UseMvcWithDefaultRoute();
+
+            /* Goal of this middleware is going to look at an incoming HTTP request and try to map that request to a method on a C# class. 
+               The MVC framwork then invokes a method, and that method will tell the MVC framework what to do next.
+            */
+            app.UseMvc(configureRoutes);
+
+            /* 
+               When the MVC middleware inspects a resquest and it sees that it doesnt any of the routes I've configured, it will 
+               allow the request to go through to the next piece of middleware. Whenever I see "Not Found", I know that the URL 
+               I'm using does not match one of the routes thats configured, or use MVC
+            */
+            app.Run(ctx => ctx.Response.WriteAsync("Not Found"));
+        }
+
+        private void configureRoutes(IRouteBuilder routeBuilder)
+        {
+            // Home/Index [Convention Based] Routing
+            routeBuilder.MapRoute("Default",
+                "{controller=Home}/{action=Index}/{id?}");
+
         }
     }
 }
